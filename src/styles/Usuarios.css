@@ -1,0 +1,36 @@
+.usuarios-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.usuarios-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.usuarios-table thead tr {
+  background-color: #007BFF;
+  color: white;
+}
+
+.usuarios-table th,
+.usuarios-table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.usuarios-table tbody tr {
+  border-bottom: 1px solid #ddd;
+}
+
+.usuarios-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.no-usuarios {
+  text-align: center;
+  padding: 10px;
+}
