@@ -71,8 +71,12 @@ const HistorialLecturas = () => {
     setNuevaLectura("");
   };
 
-  const formatearFecha = iso => {
+  /* const formatearFecha = iso => {
     const d = new Date(iso);
+    return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
+  }; */
+    const formatearFecha = iso => {
+    const d = new Date(iso + "T12:00:00"); // Añade hora para evitar timezone
     return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
   };
 
