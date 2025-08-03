@@ -76,9 +76,11 @@ const HistorialLecturas = () => {
     return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
   }; */
     const formatearFecha = (fechaStr) => {
-      const [year, month, day] = fechaStr.split("-");
-      return `${day}/${month}/${year}`;
-    };
+    if (!fechaStr) return "";
+    const [year, month, day] = fechaStr.split("T")[0].split("-");
+    return `${day}-${month}-${year}`;
+  };
+
 
     useEffect(() => {
         const cargarCategorias = async () => {
