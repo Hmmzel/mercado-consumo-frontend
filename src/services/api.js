@@ -101,17 +101,17 @@ export async function actualizarUsuario(id, datosActualizados) {
 }
 
 // Editar lectura por fecha y usuario
-export async function actualizarLectura({ fecha, id_usuario, nuevaLectura }) {
-  const response = await axios.put(`${API_URL}/lecturas`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fecha, id_usuario, nuevaLectura }),
-  });
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error?.error || "Error al actualizar lectura");
+export async function actualizarLectura({ fecha, id_usuario, lectura }) {
+  try {
+    const response = await axios.put(`${API_URL}/lecturas`, {
+      fecha,
+      id_usuario,
+      lectura
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || new Error("Error al actualizar lectura");
   }
-  return await response.json();
 }
 
 export async function obtenerLecturasPorFechaYManzana(fechaSeleccionada, manzana) {
