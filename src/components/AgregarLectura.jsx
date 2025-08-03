@@ -4,7 +4,7 @@ import {
   registrarLectura,
   getUsuarios,
   getLecturasPorFecha,
-  actualizarLectura
+  actualizarLecturaPorFecha
 } from "../services/api";
 import Modal from 'bootstrap/js/dist/modal';
 
@@ -99,10 +99,10 @@ function AgregarLectura() {
         throw new Error("No se encontró la lectura para editar");
       }
 
-      await actualizarLectura({
-        fecha,
+      await actualizarLecturaPorFecha({
         id_usuario: lecturaEditando.id_usuario,
-        nuevaLectura: parseFloat(nuevaLectura),
+        fecha,
+        lectura: parseFloat(nuevaLectura),
       });
 
       const nuevasLecturas = await getLecturasPorFecha(fecha);
