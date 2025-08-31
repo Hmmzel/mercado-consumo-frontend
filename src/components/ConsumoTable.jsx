@@ -8,22 +8,36 @@ function ConsumoTable() {
   const [loading, setLoading] = useState(true);
   const [filtroPuesto, setFiltroPuesto] = useState("");
   const [filtroMes, setFiltroMes] = useState("");
-  const consumosFiltrados = consumos.filter(c => {
-  const fecha = new Date(c.fecha);
-  const mes = fecha.getMonth() + 1; // enero = 0 → sumamos 1
-  const año = fecha.getFullYear();
+  const consumosFiltrados = consumos
+  .filter(c => {
+    const fecha = new Date(c.fecha);
+    const mes = fecha.getMonth() + 1;
+    const año = fecha.getFullYear();
 
-  // si hay filtro de puesto y no coincide → descartar
-  if (filtroPuesto && c.puesto !== filtroPuesto) return false;
+    if (filtroPuesto && c.puesto !== filtroPuesto) return false;
 
-  // si hay filtro de mes y no coincide → descartar
-  if (filtroMes) {
-    const [anioFiltro, mesFiltro] = filtroMes.split("-"); // formato yyyy-mm
-    if (Number(anioFiltro) !== año || Number(mesFiltro) !== mes) return false;
-  }
+    if (filtroMes) {
+      const [anioFiltro, mesFiltro] = filtroMes.split("-");
+      if (Number(anioFiltro) !== año || Number(mesFiltro) !== mes) return false;
+    }
 
-  return true;
+    return true;
+  })
+  .sort((a, b) => {
+  // 1) ordenar por categoría usando collation en español (maneja la Ñ correctamente)
+  const catCompare = a.categoria.localeCompare(b.categoria, "es", { sensitivity: "base" });
+  if (catCompare !== 0) return catCompare;
+
+  // 2) si la categoría es la misma, intentar ordenar por número del puesto (Z1 -> 1, Z13 -> 13)
+  const numA = parseInt((a.puesto.match(/\d+/) || ["0"])[0], 10);
+  const numB = parseInt((b.puesto.match(/\d+/) || ["0"])[0], 10);
+  if (!isNaN(numA) && !isNaN(numB) && numA !== numB) return numA - numB;
+
+  // 3) fallback: comparar por puesto como string (también con localeCompare)
+  return a.puesto.localeCompare(b.puesto, "es", { numeric: true, sensitivity: "base" });
 });
+
+
 
   useEffect(() => {
     generarConsumos()
