@@ -36,7 +36,8 @@ function GenerarBoletasWord({ consumos }) {
   const crearCelda = (item, index, imageBuffer, nombreArchivo) => {
     const colorBordes = nombreArchivo === "boletas_consumo_Copia.docx" ? "#FFFFFF" : "#FFFFFF";
     const hoy = new Date();
-    const mes = hoy.toLocaleString("default", { month: "long" }).toUpperCase();
+    const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth() - 1);
+    const mes = mesAnterior.toLocaleString("default", { month: "long" }).toUpperCase();
     const anio = hoy.getFullYear();
     const mesNumero = hoy.getMonth(); // 0-indexed
     const fechaVencimiento = new Date(anio, mesNumero, 9);
@@ -139,7 +140,7 @@ function GenerarBoletasWord({ consumos }) {
       },
       rows: [
         ["MES:", mes],
-        ["USUARIO:", item.nombre],
+        ["USUARIO:", item.nombre?.toUpperCase().includes("SIN NOMBRE") ? "" : item.nombre],
         ["PUESTO:", item.puesto],
         ["CANTIDAD PUESTOS:", item.cantidad_puestos.toFixed(0)],
         // Fila personalizada con MEDIDOR a la izquierda y MARCA a la derecha
@@ -151,7 +152,7 @@ function GenerarBoletasWord({ consumos }) {
                 new Paragraph({
                   tabStops: [{ type: "right", position: 9000 }],
                   children: [
-                    new TextRun({ text: "MEDIDOR: ____________________        MARCA: ________", color: colorTexto, font: "Arial" }),
+                    new TextRun({ text: "MEDIDOR: __________________    MARCA: _______", color: colorTexto, font: "Arial" }),
                     /* new TextRun({ text: "MARCA: ________", color: colorTexto, font: "Arial" }), */
                   ],
                 }),
@@ -338,9 +339,10 @@ function GenerarBoletasWord({ consumos }) {
 
 
     return new TableCell({
-      width: { size: 33, type: WidthType.PERCENTAGE },
+      width: { size: 50, type: WidthType.PERCENTAGE },
       children: [...encabezado, ...datosLectura, ...cargoAPagar, ...fechas],
       margins: { top: 200, bottom: 200, left: 200, right: 200 },
+      height: { value: 8000, rule: "atLeast" },
       shading: nombreArchivo === "boletas_consumo_Copia.docx" ? {
         type: "clear",
         color: "auto",
@@ -353,6 +355,8 @@ function GenerarBoletasWord({ consumos }) {
   // Celda vacía para mantener la estructura de la tabla
   const crearCeldaVacia = (colorBordes) => {
     return new TableCell({
+      width: { size: 50, type: WidthType.PERCENTAGE },
+      height: { value: 8000, rule: "atLeast" },
       children: [new Paragraph("")],
       borders: {
         top: { size: 0, color: colorBordes },
@@ -360,16 +364,17 @@ function GenerarBoletasWord({ consumos }) {
         left: { size: 0, color: colorBordes },
         right: { size: 0, color: colorBordes },
       },
-      width: { size: 33, type: WidthType.PERCENTAGE },
       margins: { top: 200, bottom: 200, left: 200, right: 200 },
     });
   };
 
   // Agrupar consumos de 2 en 2 (2 columnas por fila)
+  // Agrupar consumos de 4 en 4
   const grupos = [];
   for (let i = 0; i < consumos.length; i += 2) {
     grupos.push(consumos.slice(i, i + 2));
   }
+
 
   // Crear secciones con índice correcto para cada item
   //let contadorRecibo = 0;
@@ -388,6 +393,18 @@ function GenerarBoletasWord({ consumos }) {
     const crearDocumento = (conFondoCopia) => {
       let contadorRecibo = 0; // ✅ Esto reinicia el contador cada vez que se llama a crearDocumento
       return new Document({
+        styles: {
+      default: {
+        document: {
+          paragraph: {
+            spacing: {
+              line: 360,      // 1.5 líneas (240 = 1.0)
+              lineRule: "auto"
+            },
+          },
+        },
+      },
+    },
         sections: grupos.map((grupo) => {
           const celdas = [];
 
@@ -410,38 +427,40 @@ function GenerarBoletasWord({ consumos }) {
           while (celdas.length < 2) {
             const vacia = crearCeldaVacia();
             if (conFondoCopia) {
-              vacia.shading = {
-                type: "clear",
-                color: "auto",
-                fill: "FFFFFF",
-              };
+              vacia.shading = { type: "clear", color: "auto", fill: "FFFFFF" };
             }
             celdas.push(vacia);
           }
+
+          const filas = [new TableRow({ children: celdas })];
 
           return {
             properties: {
               type: SectionType.NEXT_PAGE,
               page: {
                 size: {
-                  width: 16838,
-                  height: 11906,
+                  width: 16838,  // 29.7 cm
+                  height: 11906, // 21 cm
                 },
+                orientation: "landscape",
                 margin: {
-                  top: 720,
-                  bottom: 720,
-                  left: 720,
-                  right: 720,
+                  top: 720,     // 1.27 cm
+                  bottom: 720,  // 1.27 cm
+                  left: 720,    // 1.27 cm
+                  right: 720,   // 1.27 cm
+                  gutter: 0,
+                  mirror: false,
                 },
               },
             },
             children: [
               new Table({
-                rows: [new TableRow({ children: celdas })],
+                rows: filas,
                 width: { size: 100, type: WidthType.PERCENTAGE },
               }),
             ],
           };
+
         }),
       });
     };

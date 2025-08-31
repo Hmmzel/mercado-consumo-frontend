@@ -7,9 +7,23 @@ function ConsumoTable() {
   const [consumos, setConsumos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filtroPuesto, setFiltroPuesto] = useState("");
-  const consumosFiltrados = filtroPuesto
-    ? consumos.filter(c => c.puesto === filtroPuesto)
-    : consumos;
+  const [filtroMes, setFiltroMes] = useState("");
+  const consumosFiltrados = consumos.filter(c => {
+  const fecha = new Date(c.fecha);
+  const mes = fecha.getMonth() + 1; // enero = 0 → sumamos 1
+  const año = fecha.getFullYear();
+
+  // si hay filtro de puesto y no coincide → descartar
+  if (filtroPuesto && c.puesto !== filtroPuesto) return false;
+
+  // si hay filtro de mes y no coincide → descartar
+  if (filtroMes) {
+    const [anioFiltro, mesFiltro] = filtroMes.split("-"); // formato yyyy-mm
+    if (Number(anioFiltro) !== año || Number(mesFiltro) !== mes) return false;
+  }
+
+  return true;
+});
 
   useEffect(() => {
     generarConsumos()
@@ -52,7 +66,8 @@ function ConsumoTable() {
         </tr>
       </thead>
       <tbody>
-        {consumos.map((item, index) => (
+        {consumosFiltrados.map((item, index) => (
+
           <tr key={index}>
             <td>{item.nombre}</td>
             <td>{item.puesto}</td>
@@ -73,7 +88,13 @@ function ConsumoTable() {
         ))}
       </tbody>
     </table>
-    <label>Filtrar por Puesto: </label>
+    <label>Filtrar por Mes: </label>
+    <input 
+      type="month" 
+      value={filtroMes} 
+      onChange={e => setFiltroMes(e.target.value)} 
+    />
+
   <select value={filtroPuesto} onChange={e => setFiltroPuesto(e.target.value)}>
     <option value="">Todos</option>
     {[...new Set(consumos.map(c => c.puesto))].map((puesto, i) => (
