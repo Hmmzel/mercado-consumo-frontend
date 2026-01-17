@@ -8,6 +8,11 @@ export async function getUsuarios() {
   return res.data;
 }
 
+export async function getRetornar() {
+  const res = await axios.get(`${API_URL}/retornar`);
+  return res.data;
+}
+
 export async function getLecturas() {
   const res = await axios.get(`${API_URL}/lecturas`);
   return res.json();
